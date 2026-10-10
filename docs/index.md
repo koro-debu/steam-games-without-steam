@@ -272,6 +272,17 @@ a file name copied from the real upload — and Windows Defender doesn't stop it
   `file-me.top`, and a string of sites impersonating repackers (`dodi-repacks.*`, `elamigos*`,
   `steam-repacks.*`, `game-repack.site`, `repack-games.com`, `steamunderground.net`…). A link
   aggregator (pastebin, Filecrypt, Multiup) that points at one of these is no safer than the host.
+- **"Crack" and "keygen" sites found through a search engine are the same trap, older.** The
+  pattern, taken apart on Tuts4You in 2020–21 (keygens.pro, keygenninja.com, cracknet.net and a
+  dozen sister domains sharing one server): whatever you ask for, you get a **password-protected
+  archive** with the password printed on the page (`123`, `12345`) holding a `setup_pass-123.exe` or
+  a self-extracting archive. The password is there so the scanner of the site, of your browser and
+  of your antivirus can't look inside before you run it. What came out was named families — Remcos
+  and PoisonIvy (remote access), Vidar and CopperStealer (saved passwords and browser cookies) —
+  around 10,000 installs a day for the busiest site. The domains rotate; the shape doesn't. A
+  release group's name and an `.nfo` in the archive prove nothing — they were copied too. And
+  **paying doesn't change it**: a March 2026 thread there is someone who bought a $7 "crack" that
+  worked and was a RAT as well.
 
 The tools in this repo don't have that problem — they come from GitHub release pages. It's the
 [mirrors for game files](Generic%20Guide%20-%20Clean%20Base%20%2B%20Safe%20Crack%20%2B%20Multiplayer.md#3-get-an-unmodified-base)

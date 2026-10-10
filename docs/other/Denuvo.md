@@ -150,10 +150,17 @@ store page, which is a separate, per-hardware count.
 
 Neither source documents how long an activation lasts once it's done, so no promise is made about
 that here. What they do make clear is what sends you back to step 1 — and the players on cs.rin.ru's
-Steam ticket thread add the hardware side, as their own experience rather than a documented rule:
-the activation is tied to the machine, so **an OS update, a hardware or BIOS change, or a driver
-update** can invalidate it; owning only part of a game's **SecureDLC** while the setup claims more
-deletes it (a backup of it is no help); and the `alt_steamid` trial and error above can too.
+Steam ticket thread add the hardware side from their own experience: the activation is tied to the
+machine, so **an OS update, a hardware or BIOS change, or a driver update** can invalidate it; owning
+only part of a game's **SecureDLC** while the setup claims more deletes it (a backup of it is no
+help); and the `alt_steamid` trial and error above can too.
+
+The hardware part matches how Denuvo is publicly described: the license saved by the game is built
+from the machine it was requested on, and when the machine no longer matches, the game throws that
+license away and asks for a new one — a new activation, and here a new ticket. In practice, expect
+it after **a CPU change, adding or removing RAM, changing how many cores are enabled** (in the BIOS,
+or the CPU count of a virtual machine) and **Windows updates**, feature updates above all. The
+players' "driver update" isn't among the documented causes; treat it as reported, not established.
 
 - **The ticket is older than 30 minutes** when the game asks for it.
 - **The SteamID in `configs.user.ini` no longer matches** the account the ticket came from — edited,
