@@ -1,0 +1,47 @@
+site_name: Steam Games Without Steam
+site_description: Running the Steam games you own without the Steam client — with tools you can check.
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: blue grey
+      accent: light blue
+  features:
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+markdown_extensions:
+  - tables
+  - admonition
+  - toc:
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.superfences
+  - pymdownx.magiclink
+nav:
+  - Home: index.md
+  - Generic guide: "Generic Guide - Clean Base + Safe Crack + Multiplayer.md"
+  - Making a game run:
+      - Goldberg (gbe_fork): "running/Installation Guide - Goldberg Steam Emulator.md"
+      - Steamless: "running/Steamless Usage Guide.md"
+      - RUNE: "running/RUNE Steam Emulator User Guide.md"
+      - RUNEAutoCracker: "running/RUNEAutoCracker.md"
+  - Multiplayer:
+      - Which tool, and with whom: "multiplayer/Multiplayer Routing.md"
+      - EOS proxy: "multiplayer/EOS Proxy Usage Guide.md"
+      - uc-online2: "multiplayer/uc-online2.md"
+  - Game files:
+      - DepotDownloader: "game-files/DepotDownloader.md"
+      - Saves and achievements: "game-files/Saves and Achievements.md"
+      - Updating a game: "game-files/Updating a Cracked Game.md"
+  - Everything else:
+      - DLC unlocking: "other/DLC Unlocking.md"
+      - Steam Achievement Manager: "other/Steam Achievement Manager (SAM) Usage Guide.md"
+      - Denuvo: "other/Denuvo.md"
+      - What's not here, and why: "other/Closed-Source Tools.md"
+  - Lists:
+      - Denuvo: "lists/Denuvo.md"
+      - Anti-cheat: "lists/Anti-Cheat.md"
