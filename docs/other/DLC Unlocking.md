@@ -74,23 +74,34 @@ Unlocking says *"you own this"*; it downloads nothing. Games that ship DLC asset
 install will work. Games that only fetch them after purchase will show you an unlocked entry with
 nothing behind it.
 
-You don't have to guess. Steam attaches a `dlcappid` to any depot it should only download for
-owners, and that's readable:
+You don't have to guess. Steam marks content it should only download for owners, and that's
+readable — but in **two places**, and checking only the first one is a mistake this page used to make:
+
+- depots of the **base game** that carry a `dlcappid` (ETS2's map packs);
+- depots declared under the **DLC's own app ID**. The base game then shows zero gated depots, and the
+  content still isn't on your disk ([A Dance of Fire and Ice](#a-dance-of-fire-and-ice-withdrawn)).
+
+This checks both, one request per DLC (so it's slow on a game with a hundred of them):
 
 ```bash
 APPID=282800   # 100% Orange Juice, as an example
-curl -s "https://api.steamcmd.net/v1/info/$APPID" | python3 -c "
-import json,sys,os
-d=json.load(sys.stdin)['data'][os.environ['APPID']]['depots']
-dep=[k for k in d if k.isdigit()]
-gated=[k for k in dep if (d[k].get('dlcappid') or (d[k].get('config') or {}).get('dlcappid'))]
-print(f'{len(gated)} of {len(dep)} depots are DLC-gated')"
+APPID=$APPID python3 -c "
+import json,os,urllib.request
+def info(a): return json.load(urllib.request.urlopen(f'https://api.steamcmd.net/v1/info/{a}'))['data'][str(a)]
+d=info(os.environ['APPID']); dep=d.get('depots',{}); ids=[k for k in dep if k.isdigit()]
+gated=[k for k in ids if dep[k].get('dlcappid') or (dep[k].get('config') or {}).get('dlcappid')]
+print(f'base game: {len(gated)} of {len(ids)} depots are DLC-gated')
+for x in [x for x in str(d.get('extended',{}).get('listofdlc','')).split(',') if x]:
+    sub=info(x); own=[k for k in sub.get('depots',{}) if k.isdigit()]
+    print(f'DLC {x} ({sub.get(\"common\",{}).get(\"name\",\"?\")}): ' + (f'{len(own)} depots of its own' if own else 'no depot of its own'))"
 ```
 
-**Zero gated depots and a long DLC list is the ideal case**: everything ships in the base install and
-only an ownership flag stands in the way. The opposite result is
-[ETS2](#a-second-one-euro-truck-simulator-2), where 111 of 115 depots are gated and the content is
-simply not on your disk.
+**Zero gated depots and every DLC printing *no depot of its own* is the ideal case**: everything
+ships in the base install and only an ownership flag stands in the way. 100% Orange Juice is that
+case (0 of 6, and none of its DLC has a depot). The opposite results are
+[ETS2](#a-second-one-euro-truck-simulator-2), where 111 of 115 depots are gated, and A Dance of Fire
+and Ice, whose one content DLC has 4 depots of its own — either way, the content is simply not on
+your disk.
 
 ### A worked example: The Sims 4
 
@@ -142,11 +153,15 @@ Match the **game's** bitness, not your OS's. Task Manager → *Details* → righ
 *Select columns* → *Platform* shows it while the game runs.
 
 > **Read it off the running process, never off the folder.** A game can ship *both* `steam_api.dll`
-> and `steam_api64.dll`, and the one present tells you nothing about the executable that runs. *A
-> Dance of Fire and Ice* ships `steam_api64.dll` and runs as a **32-bit** process — `smoke_api32.dll`
-> is the one that loads there. If you pick wrong you don't get a subtle failure: a 32-bit DLL simply
-> cannot load into a 64-bit process, and vice-versa, so `SmokeAPI.log.log` never appears. Which makes
-> the log a free bitness check — if it shows up, you matched.
+> and `steam_api64.dll`, and the one present tells you nothing about the executable that runs. If you
+> pick wrong you don't get a subtle failure: a 32-bit DLL simply cannot load into a 64-bit process,
+> and vice-versa, so `SmokeAPI.log.log` never appears. Which makes the log a free bitness check — if
+> it shows up, you matched.
+>
+> **And check again after an update.** *A Dance of Fire and Ice* has both a 32-bit and a 64-bit
+> Windows depot. The install tested here in August 2026 loaded `smoke_api32.dll`; by October 2026
+> (build 24397494) the same install was running a **64-bit** executable, and the 32-bit `version.dll`
+> left from that test could no longer load at all. Nothing tells you — the log just stops appearing.
 
 Upstream's advice, worth following: **try hook mode first**, fall back to proxy mode.
 
@@ -221,14 +236,30 @@ nothing else moved.
 Worth noting that the depot check predicted the outcome before anything was installed. That's the
 part to reuse.
 
-**A Dance of Fire and Ice** (AppID 977950), SmokeAPI v4.1.3, hook mode as `version.dll`, tested
-2026-08-11. Single-player, no anti-cheat, and **zero of 5 depots gated** — the same profile. Its one
-content DLC is *Neo Cosmos* (1977570); the other two entries in its DLC list are soundtracks, which
-unlock nothing. Forcing 1977570 alone with `default_app_status: original` made the Neo Cosmos levels
-appear in the menu.
+### A Dance of Fire and Ice (withdrawn)
 
-The bitness note above came out of this one: the game ships `steam_api64.dll` but runs 32-bit, so
-`smoke_api32.dll` was what loaded — the log appearing is what proved it.
+Listed under *Confirmed working* in August 2026, **withdrawn in October 2026**, and kept here because the
+mistake is the useful part.
+
+AppID 977950, SmokeAPI v4.1.3, hook mode as `version.dll`, tested 2026-08-11. Single-player, no
+anti-cheat, and zero of 5 base depots gated — which looked like the Car Mechanic profile. Its one
+content DLC is *Neo Cosmos* (1977570); the other two entries in its DLC list are soundtracks. Forcing
+1977570 with `default_app_status: original` made SmokeAPI report it owned, and the Neo Cosmos entry
+appeared.
+
+What that test didn't check is whether the levels behind it would load. Read in the game's own code
+(build 24397494): a DLC counts as *installed* only if two files exist in the game's `Bundles\`
+folder — `neocosmos_scenes_all.bundle` and `neocosmos_assets_all.bundle` (about 143 MB). They come
+from Neo Cosmos's **own depots** (1977571–1977574, declared under the DLC's app ID, so the base-game
+check never sees them), and Steam downloads them only for owners. Without them, the Neo Cosmos screen
+says the DLC isn't installed and the levels stay locked, whatever the unlocker answers. Its log says
+it plainly too — `%USERPROFILE%\AppData\LocalLow\7th Beat Games\A Dance of Fire and Ice\Player.log`
+prints `Neo Cosmos: owns …, installed …` at startup.
+
+Re-tested 2026-10-17 under gbe_fork (SteamAutoCrack 3.5.1.0, `unlock_all=0` with 1977570 listed):
+on a copy **without** the two bundles, `owns True, installed False`; on a copy **with** them,
+`owns True, installed True` — the state in which the game's code unlocks the Neo Cosmos levels. So it's a game where the unlock works
+and the content has to come from your own Steam download — the ETS2 case, not the Car Mechanic one.
 
 ---
 

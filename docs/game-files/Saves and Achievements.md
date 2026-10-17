@@ -18,6 +18,17 @@ Three cases, and which one you're in depends entirely on how the game was writte
 | Through Steam Cloud / Remote Storage | **Everything.** Those calls now land in gbe_fork's own folder, and your existing saves are invisible to the game |
 | Into the game's install folder | Nothing, unless you also replaced the folder |
 
+A fourth case is easy to miss: **the game picks between those depending on where it is installed.**
+*A Dance of Fire and Ice* (Unity; read in its code, build 24397494) writes `data.sav` and
+`custom_data.sav` into `<game folder>\User\` **only when the game folder sits inside a
+`steamapps\common\` folder**. Anywhere else — your desktop, a games drive — it writes to
+`%USERPROFILE%\AppData\LocalLow\7th Beat Games\A Dance of Fire and Ice\` instead, and starts from a
+blank save. So moving your copy out of the Steam library looks like losing your progress. Two fixes:
+copy the two `.sav` files into the folder it now uses, or keep the copy under a path ending in
+`steamapps\common\A Dance of Fire and Ice` (any drive, no Steam needed — only the folder names
+matter), and the saves stay next to the game. Unity games in general default to that `LocalLow`
+folder; it's the "own folder" case of the first row.
+
 gbe_fork's location, on Windows:
 
 ```text

@@ -357,7 +357,10 @@ unlock_all=0
 ```
 
 Note that this is the emulator's own answer, and has nothing to do with whether the DLC *files* are
-on disk — see [DLC Unlocking](../other/DLC%20Unlocking.md) for that distinction.
+on disk — see [DLC Unlocking](../other/DLC%20Unlocking.md) for that distinction. *A Dance of Fire and
+Ice* is the clear example: its Neo Cosmos DLC reports owned under gbe_fork either way, but its levels
+only open once the DLC's two `Bundles\neocosmos_*.bundle` files are in the copy — files Steam only
+downloads for owners. Copy your install from a Steam library where the DLC is installed.
 
 Its sibling is `steam_settings\installed_app_ids.txt`, which does the same job for *"is this app
 installed"* rather than *"do I own this DLC"*. Both are covered together under
