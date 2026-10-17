@@ -77,7 +77,8 @@ makes the game start without Steam**, which in practice is [gbe_fork](../running
 the reason to reach for eos-proxy is playing outside Steam, and without a Steam layer the game doesn't
 launch at all. gbe_fork isn't something eos-proxy needs configured for it — the two simply go together.
 **Bodycam** and **Big Walk** were set up exactly like this on 2026-10-10: game already running under
-gbe_fork, then the two steps above, nothing else.
+gbe_fork, then the two steps above, nothing else. On Bodycam that got online play working, **but not
+the in-game shop** — see [Confirmed games](#confirmed-games).
 
 To uninstall: delete the proxy DLL and rename `.yes` back to `.dll`.
 
@@ -176,7 +177,7 @@ Upstream has tested very few. Treat anything else as unknown.
 | Game | Status |
 |---|---|
 | Sledding Game | Works |
-| Bodycam | Works — gbe_fork + the two install steps, nothing else (tested here, 2026-10-10) |
+| Bodycam | **Partly.** Online play works with gbe_fork + the two install steps (tested here, 2026-10-10); the **in-game shop doesn't**. Online-Fix's package for the same game had the shop working too (tested here; that package was not audited) |
 | Big Walk | Same (tested here, 2026-10-10) |
 | SpiderHeck | Works, but **not** with gbe_fork — use uc-online2 or SLSsteam |
 | Absolum | Needs the `absolum` branch |
@@ -223,6 +224,7 @@ Read the log to tell these apart:
 | No log at all | The proxy never loaded — wrong SDK replaced, or the game reads it elsewhere |
 | `ERROR when calling EOS_Connect_Login` | Epic refused the device-ID login. Developer-side, nothing to do |
 | `ResultCode: 0` and multiplayer still dead | The sessions do not run on EOS, or need more than a login — check the game's own log next |
+| Matches work, but the shop / unlocks / leaderboards don't | Those features sit on another backend than the sessions (Bodycam). Test each online feature, not just joining a game |
 
 ---
 

@@ -85,6 +85,9 @@ The game's netcode runs on Epic's servers even though you bought it on Steam.
 **Who you play with:** **everyone.** This is the only case in the repo where you end up in the same
 sessions as people who bought the game normally — the traffic really does go through Epic.
 **Where it fails:** the developer can disable device-ID login, and then nothing client-side helps.
+**Check every online feature, not just joining a match.** On Bodycam, eos-proxy got matches working
+but not the in-game shop, which Online-Fix's package for the game did run — so even when EOS works,
+compare it with the other routes before settling.
 
 ---
 
