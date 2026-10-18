@@ -32,7 +32,9 @@ Back up these, in this order of importance:
 2. **Saves, if they're inside the game folder.** They usually aren't — gbe_fork writes to
    `%APPDATA%\GSE Saves\` by default. But if you set `local_save_path=./` as described in the
    [Goldberg guide](../running/Installation%20Guide%20-%20Goldberg%20Steam%20Emulator.md), your saves are sitting
-   in the folder you're about to overwrite. Check before, not after.
+   in the folder you're about to overwrite. The same goes for a junction launcher's `Saves\` folder
+   ([Keeping the saves next to the game](Saves%20and%20Achievements.md#keeping-the-saves-next-to-the-game)).
+   Check before, not after.
 3. **A list of what you added.** Usually: `steam_api64.dll`, `steam_api64_o.dll`,
    `steam_settings\`, and for EOS games `EOSSDK-Win64-Shipping.yes` plus the proxy.
 

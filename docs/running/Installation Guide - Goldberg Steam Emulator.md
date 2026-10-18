@@ -313,6 +313,11 @@ copying `configs.user.EXAMPLE.ini` and dropping the `.EXAMPLE` (step 5):
 local_save_path=./
 ```
 
+`./` means the folder of the emulator's DLL, which isn't always the game's root (Unity:
+`<Game>_Data\Plugins\x86_64\`). Pin `account_steamid` at the same time, or a game that files saves by
+SteamID may start blank — details in
+[Keeping the saves next to the game](../game-files/Saves%20and%20Achievements.md#keeping-the-saves-next-to-the-game).
+
 > Key and section names have changed between gbe_fork versions — open the
 > `configs.user.EXAMPLE.ini` shipped in your release and match what's already commented in it
 > rather than pasting blindly.

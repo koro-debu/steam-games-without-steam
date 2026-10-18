@@ -88,6 +88,91 @@ elsewhere, try a lower one (and keep the save trick for games that really need *
 
 ---
 
+## Keeping the saves next to the game
+
+A cracked copy is easier to back up, move or delete when its saves live in its own folder — say
+`<game>\Saves\` — instead of somewhere under `%APPDATA%`. How you get there depends on who writes the
+save (the table at the top).
+
+**Through the emulator** (Steam Cloud games): `local_save_path` in `steam_settings\configs.user.ini`.
+Two details decide whether it works:
+
+- **The path is relative to the folder of the emulator's DLL**, not to the exe. For a Unity game the
+  DLL sits in `<Game>_Data\Plugins\x86_64\`, so the game's root is three levels up:
+  ```ini
+  [user::saves]
+  local_save_path=../../../Saves/Goldberg
+  ```
+- **Pin the SteamID in the same file.** With `local_save_path` set, the emulator ignores the global
+  `GSE Saves\settings\` folder — including the ID it generated the first time. Without
+  `account_steamid=` under `[user::general]` it may draw a new one, and a game that files saves by
+  SteamID then starts blank. Use the ID the game was already using (the name of its save folder, if it
+  makes one per SteamID). Then copy `GSE Saves\<appid>\` into the new folder.
+
+**By the game itself, outside the install** (Unity's `%USERPROFILE%\AppData\LocalLow\<Company>\<Product>\`,
+`Saved Games`, `Documents\My Games`…): first check whether the game picks its folder from its own
+location or a setting (the *A Dance of Fire and Ice* case above) — if it does, use that. Otherwise the
+game has no option to change, but Windows does: a **directory junction** from the folder the game
+expects to the one next to it. `mklink /J` needs no administrator rights, and `rmdir` without `/s` on
+a junction removes only the link, never the files behind it. Wrapping it in a launcher that sets the
+junction up for the session and removes it afterwards keeps the real install (if you also play it
+through Steam) untouched:
+
+```bat
+@echo off
+rem Starts the game with its saves in the "Saves" folder next to it.
+setlocal
+set "L=%USERPROFILE%\AppData\LocalLow\Company\Product"
+set "S=%~dp0Saves"
+set "G=%~dp0"
+for %%I in ("%L%") do (set "P=%%~dpI" & set "B=%%~nxI")
+if not exist "%S%" mkdir "%S%"
+if not exist "%P%" mkdir "%P%"
+rem a link left behind by a crashed session: remove the link only
+dir /AL /B "%P%" 2>nul | findstr /X /I /L /C:"%B%" >nul && rmdir "%L%"
+rem a real folder (the Steam version's saves): set aside as _o, put back at the end
+if exist "%L%\" (
+  if exist "%L%_o\" ( echo "%L%_o" already exists, nothing touched. & pause & exit /b 1 )
+  ren "%L%" "%B%_o"
+)
+mklink /J "%L%" "%S%" >nul
+dir /AL /B "%P%" 2>nul | findstr /X /I /L /C:"%B%" >nul || goto failed
+cd /d "%~dp0"
+start "" /wait "%~dp0Game.exe"
+rem some games restart themselves in a new process: wait until nothing from this folder runs
+:wait
+powershell -NoProfile -Command "if (Get-Process | Where-Object { $_.Path -and $_.Path.StartsWith($env:G, [StringComparison]::OrdinalIgnoreCase) }) { exit 1 }" >nul 2>&1
+if errorlevel 1 ( timeout /t 5 /nobreak >nul & goto wait )
+rmdir "%L%"
+if exist "%L%_o\" ren "%L%_o" "%B%"
+exit /b 0
+:failed
+echo Could not create the link to "%S%": the game was not started.
+if not exist "%L%\" if exist "%L%_o\" ren "%L%_o" "%B%"
+pause
+exit /b 1
+```
+
+Set `L` to the game's folder and `Game.exe` to its exe, save it as `Start <game>.cmd` in the game
+folder, and point your shortcut at it (*Run: Minimized* hides the console). Before the first run,
+**copy the existing saves into `Saves\`** with the game closed — otherwise the first session shows an
+empty folder and the old saves sit in `_o` until the end. Rules that follow from how it works:
+
+- **Always start the game through the launcher.** Started from its exe, the game writes to the
+  normal folder again.
+- **A save folder already called `<name>_o`** stops the launcher: it would otherwise overwrite it.
+- **Batch files are read in the console's code page**: a path with accented characters must be
+  saved in that encoding (OEM, e.g. 850), not UTF-8.
+- **Some games write the SteamID inside the save file too**, not just in the folder name — *How to
+  Fish* (Unity) keeps it in `Players[].SteamID` of its JSON save. Moving such a save to another ID
+  means editing the file, not just renaming the folder; pinning `account_steamid` avoids the problem.
+- **Updating the game** later: your saves are now inside the folder you'd overwrite — see
+  [Updating a game](Updating%20a%20Cracked%20Game.md).
+
+Both methods can be combined: the emulator's files in `Saves\Goldberg\`, the game's own in `Saves\`.
+
+---
+
 ## Achievements: two halves that people confuse
 
 An achievement needs a **definition** (what exists, what it's called) and a **state** (whether you
@@ -286,4 +371,5 @@ mainstream.
 | Why does the game show zero achievements? | No `achievements.json` in `steam_settings` — generate it; the maintained `generate_emu_config` lives in [gse_fork_tools](https://github.com/alex47exe/gse_fork_tools) |
 | Why no unlock notification? | The overlay is off by default; or use Achievement Watcher Next |
 | Achievement Watcher sees nothing | The original scans `Goldberg SteamEmu Saves`, not `GSE Saves`: add the folder, then click the bell. AW Next finds it with *Smart Find* |
+| Can the saves live in the game folder? | Emulator saves: `local_save_path` (relative to the DLL's folder) + `account_steamid`. The game's own: a junction launcher — see [Keeping the saves next to the game](#keeping-the-saves-next-to-the-game) |
 | Can I sync progress back to Steam afterwards? | No |
